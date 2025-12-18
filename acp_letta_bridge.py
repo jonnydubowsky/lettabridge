@@ -10,8 +10,8 @@ import logging
 import asyncio
 from typing import Dict, Any, Optional
 from acp_protocol import ACPHandler
-from letta_client_wrapper import LettaClientWrapper
-from config import Config
+from letta_client import LettaClientWrapper
+from config import BridgeConfig
 
 # Configure logging to stderr (stdout is for JSON-RPC)
 logging.basicConfig(
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class ACPLettaBridge:
     """Main bridge server connecting ACP to Letta"""
     
-    def __init__(self, config: Config):
+    def __init__(self, config: BridgeConfig):
         self.config = config
         self.acp_handler = ACPHandler()
         self.letta_client = LettaClientWrapper(config)

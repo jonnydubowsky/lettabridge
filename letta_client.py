@@ -1,126 +1,120 @@
 """
-Letta Client Wrapper
-Abstracts Letta API interactions
+Letta API client wrapper
+Handles communication with Letta server
 """
 
+import os
 import logging
-from typing import List, Dict, Any, Optional
-from letta import LettaClient, create_client
+from typing import Dict, Any, Optional, List
+from letta import LettaClient
+from config import BridgeConfig
 
 logger = logging.getLogger(__name__)
 
 
 class LettaClientWrapper:
-    """Wrapper for Letta API with error handling"""
+    """Wrapper around Letta Python SDK"""
     
-    def __init__(self, base_url: str, api_key: Optional[str] = None):
-        self.base_url = base_url
-        self.api_key = api_key
+    def __init__(self, config: BridgeConfig):
+        self.config = config
+        self.client: Optional[LettaClient] = None
+        self.agents: Dict[str, str] = {}  # name -> agent_id
         
-        # Initialize Letta client
-        if api_key:
-            self.client = create_client(base_url=base_url, token=api_key)
-        else:
-            self.client = create_client(base_url=base_url)
-            
-        self.agents = {}  # Cache: agent_id -> agent_state
-        
-        logger.info(f"Initialized Letta client: {base_url}")
-    
-    async def create_agent(
-        self, 
-        name: str, 
-        instructions: str,
-        tools: Optional[List[str]] = None
-    ) -> str:
-        """
-        Create new Letta agent
-        
-        Returns:
-            agent_id (str)
-        """
+    async def connect(self):
+        """Connect to Letta server"""
         try:
-            # Default tools if none specified
-            if tools is None:
-                tools = ["send_message", "conversation_search"]
-            
-            # Create agent via Letta API
-            agent_state = self.client.create_agent(
-                name=name,
-                system=instructions,
-                tools=tools
+            self.client = LettaClient(
+                base_url=self.config.letta_base_url,
+                token=self.config.letta_api_token
             )
-            
-            agent_id = agent_state.id
-            self.agents[agent_id] = agent_state
-            
-            logger.info(f"Created agent: {name} (ID: {agent_id})")
-            return agent_id
-            
+            logger.info(f"Connected to Letta server: {self.config.letta_base_url}")
         except Exception as e:
-            logger.error(f"Failed to create agent: {e}")
+            logger.error(f"Failed to connect to Letta: {e}")
             raise
     
-    async def send_message(
-        self, 
-        agent_id: str, 
-        message: str
-    ) -> Dict[str, Any]:
-        """
-        Send message to agent and get response
-        
-        Returns:
-            {
-                "messages": [...],
-                "usage": {...}
-            }
-        """
+    async def disconnect(self):
+        """Disconnect from Letta server"""
+        # Letta client doesn't require explicit disconnect
+        logger.info("Disconnected from Letta server")
+    
+    async def get_or_create_agent(self, agent_name: str, agent_config: Dict[str, Any]) -> str:
+        """Get existing agent or create new one"""
         try:
-            # Send message via Letta API
+            # List existing agents
+            agents = self.client.list_agents()
+            
+            # Check if agent exists
+            for agent in agents:
+                if agent.name == agent_name:
+                    logger.info(f"Found existing agent: {agent_name} ({agent.id})")
+                    self.agents[agent_name] = agent.id
+                    return agent.id
+            
+            # Create new agent
+            logger.info(f"Creating new agent: {agent_name}")
+            
+            agent = self.client.create_agent(
+                name=agent_name,
+                system=agent_config.get("persona", "You are a helpful assistant."),
+                tools=agent_config.get("tools", []),
+                llm_config={
+                    "model": "claude-sonnet-4",
+                    "context_window": 32000
+                },
+                embedding_config={
+                    "embedding_model": "text-embedding-3-small"
+                }
+            )
+            
+            self.agents[agent_name] = agent.id
+            logger.info(f"Created agent: {agent_name} ({agent.id})")
+            return agent.id
+            
+        except Exception as e:
+            logger.error(f"Error getting/creating agent: {e}")
+            raise
+    
+    async def send_message(self, agent_id: str, message: str) -> Dict[str, Any]:
+        """Send message to Letta agent and get response"""
+        try:
             response = self.client.send_message(
                 agent_id=agent_id,
                 message=message,
                 role="user"
             )
             
-            # Extract assistant messages
-            messages = [
-                msg.message
-                for msg in response.messages
-                if hasattr(msg, 'message')
-            ]
+            # Extract text from response messages
+            text_parts = []
+            memory_updated = False
+            reasoning = ""
+            
+            for msg in response.messages:
+                if hasattr(msg, 'text') and msg.text:
+                    text_parts.append(msg.text)
+                if hasattr(msg, 'function_call'):
+                    if msg.function_call and 'memory' in msg.function_call.name:
+                        memory_updated = True
             
             return {
-                "messages": messages,
-                "usage": response.usage if hasattr(response, 'usage') else {}
+                "text": "
+".join(text_parts),
+                "memory_updated": memory_updated,
+                "reasoning": reasoning,
+                "raw_response": response
             }
             
         except Exception as e:
-            logger.error(f"Failed to send message: {e}")
+            logger.error(f"Error sending message to agent: {e}")
             raise
     
-    async def get_agent(self, agent_id: str) -> Optional[Dict[str, Any]]:
-        """Get agent details"""
+    async def get_agent_memory(self, agent_id: str) -> Dict[str, Any]:
+        """Retrieve agent's memory blocks"""
         try:
-            if agent_id in self.agents:
-                return self.agents[agent_id]
-            
-            agent_state = self.client.get_agent(agent_id)
-            self.agents[agent_id] = agent_state
-            return agent_state
-            
+            memory = self.client.get_agent_memory(agent_id)
+            return {
+                "core_memory": memory.get_blocks(),
+                "archival_memory": memory.get_archival()
+            }
         except Exception as e:
-            logger.error(f"Failed to get agent: {e}")
-            return None
-    
-    async def delete_agent(self, agent_id: str):
-        """Delete agent"""
-        try:
-            self.client.delete_agent(agent_id)
-            if agent_id in self.agents:
-                del self.agents[agent_id]
-            logger.info(f"Deleted agent: {agent_id}")
-            
-        except Exception as e:
-            logger.error(f"Failed to delete agent: {e}")
+            logger.error(f"Error retrieving agent memory: {e}")
             raise

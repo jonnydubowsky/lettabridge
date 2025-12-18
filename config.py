@@ -15,7 +15,13 @@ class BridgeConfig(BaseSettings):
     letta_base_url: str = "http://localhost:8283"
     letta_api_key: Optional[str] = None
     
+    @property
+    def letta_api_token(self) -> Optional[str]:
+        """Alias for letta_api_key for compatibility"""
+        return self.letta_api_key
+    
     # Bridge Configuration
+    agent_name: str = "zed_coding_assistant"
     log_level: str = "INFO"
     max_agents: int = 10
     agent_timeout: int = 300  # seconds
