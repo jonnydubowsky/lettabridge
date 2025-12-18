@@ -1,0 +1,11 @@
+# Install PyInstaller
+pip install pyinstaller
+
+# Build standalone binary
+pyinstaller --onefile \
+    --name letta-acp-bridge \
+    --hidden-import=letta \
+    --hidden-import=pydantic \
+    src/acp_server.py
+
+# Binary created in dist/letta-acp-bridge

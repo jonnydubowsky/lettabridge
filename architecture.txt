@@ -1,0 +1,5 @@
+Zed Editor (ACP Client)
+    ↓ JSON-RPC over stdio
+ACP Bridge Server (Python)
+    ↓ HTTP/REST API
+Letta Agent System

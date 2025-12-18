@@ -1,0 +1,10 @@
+acp-letta-bridge/
+├── acp_letta_bridge.py      # Main bridge server
+├── acp_protocol.py           # ACP protocol handler
+├── letta_client_wrapper.py  # Letta API wrapper
+├── config.py                 # Configuration
+├── requirements.txt          # Python dependencies
+├── extension.toml            # Zed extension manifest
+├── build.sh                  # Build script for binaries
+├── README.md                 # Documentation
+└── test_bridge.py            # Testing utilities

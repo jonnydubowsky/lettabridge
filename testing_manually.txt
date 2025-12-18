@@ -1,0 +1,5 @@
+# Run test suite
+python3 test_bridge.py
+
+# Or manually with echo
+echo '{"jsonrpc":"2.0","method":"initialize","params":{},"id":1}' | python3 acp_letta_bridge.py

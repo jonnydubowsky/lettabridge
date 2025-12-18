@@ -1,0 +1,29 @@
+id = "letta-agent"
+name = "Letta Agent"
+description = "Stateful AI coding assistant powered by Letta"
+version = "0.1.0"
+schema_version = 1
+authors = ["Jonny Dubowsky <jonny@totemprotocol.com>"]
+repository = "https://github.com/yourusername/acp-letta-bridge"
+
+[agent]
+name = "Letta Coding Assistant"
+description = "AI coding assistant with persistent memory across sessions"
+command = "acp-letta-bridge"
+
+# Platform-specific binaries
+[agent.binaries.macos-aarch64]
+url = "https://github.com/yourusername/acp-letta-bridge/releases/download/v0.1.0/acp-letta-bridge-macos-aarch64"
+sha256 = "..." # Add after building
+
+[agent.binaries.macos-x86_64]
+url = "https://github.com/yourusername/acp-letta-bridge/releases/download/v0.1.0/acp-letta-bridge-macos-x86_64"
+sha256 = "..." # Add after building
+
+[agent.binaries.linux-x86_64]
+url = "https://github.com/yourusername/acp-letta-bridge/releases/download/v0.1.0/acp-letta-bridge-linux-x86_64"
+sha256 = "..." # Add after building
+
+[agent.binaries.windows-x86_64]
+url = "https://github.com/yourusername/acp-letta-bridge/releases/download/v0.1.0/acp-letta-bridge-windows-x86_64.exe"
+sha256 = "..." # Add after building

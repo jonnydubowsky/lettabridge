@@ -1,0 +1,6 @@
+You: "Help me refactor this function for better performance"
+
+Letta: [Analyzes code with persistent context from previous sessions]
+       [Uses web_search to find best practices]
+       [Provides refactored version with explanation]
+       [Remembers your coding style preferences]

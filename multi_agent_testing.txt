@@ -1,0 +1,8 @@
+# Run tests
+python3 test_bridge.py
+
+# Build binaries
+./build.sh
+
+# Watch logs
+python3 acp_letta_bridge.py 2>bridge.log

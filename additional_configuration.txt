@@ -1,0 +1,4 @@
+export LETTA_BASE_URL="http://localhost:8283"
+export LETTA_API_TOKEN="your-token-here"  # If using auth
+export AGENT_NAME="zed_coding_assistant"
+export LOG_LEVEL="INFO"

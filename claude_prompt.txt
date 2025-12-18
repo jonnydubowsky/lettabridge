@@ -1,0 +1,11 @@
+I need you to help me implement an ACP-to-Letta bridge based on this specification.
+
+Start by creating the file structure and implementing acp_letta_bridge.py.
+Test it locally with a running Letta server.
+Then we'll build binaries and create a Zed extension.
+
+The goal is to connect Zed Editor to Letta agents so I have stateful AI coding
+assistance with persistent memory across sessions.
+
+The instructions for the development are outlined in each file in this folder.
+I want to set this up as a github repository and follow proper version control and checkpointing.

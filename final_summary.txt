@@ -1,0 +1,58 @@
+Next Steps
+Phase 1: Core Implementation (Week 1)
+
+    ✅ Project structure
+    ✅ ACP server with stdio transport
+    ✅ Letta client wrapper
+    ✅ Message handlers
+    ✅ Configuration management
+
+Phase 2: Testing (Week 2)
+
+    Unit tests for all components
+    Integration tests with mock Letta
+    Manual testing with test client
+
+Phase 3: Packaging (Week 3)
+
+    Build binaries for all platforms
+    Create Zed extension
+    Documentation
+
+Phase 4: Deployment (Week 4)
+
+    Publish to GitHub
+    Submit to Zed extension registry
+    Gather user feedback
+
+Resources
+
+    ACP Spec: https://agentclientprotocol.com/
+    Letta Docs: https://docs.letta.com/
+    Zed Extensions: https://zed.dev/docs/extensions
+    JSON-RPC 2.0: https://www.jsonrpc.org/specification
+
+🚀 Ready to build!
+
+Give this complete specification to Claude Code and start with implementing src/acp_server.py first.
+
+│ Zed Editor (ACP Client)                  │
+│ • Spawns agent as subprocess             │
+│ • Sends JSON-RPC via stdio               │
+└──────────────┬───────────────────────────┘
+               │ JSON-RPC over stdin/stdout
+               ▼
+┌──────────────────────────────────────────┐
+│ ACP Bridge Server (acp_letta_bridge.py) │
+│ • Reads JSON-RPC from stdin              │
+│ • Translates to Letta API calls          │
+│ • Writes responses to stdout             │
+└──────────────┬───────────────────────────┘
+               │ HTTP REST API
+               ▼
+┌──────────────────────────────────────────┐
+│ Letta Server (localhost:8283)            │
+│ • Agent management                       │
+│ • Persistent memory                      │
+│ • Tool execution                         │
+└──────────────────────────────────────────┘

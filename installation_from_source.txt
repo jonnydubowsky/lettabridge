@@ -1,0 +1,9 @@
+# Clone repository
+git clone https://github.com/yourusername/acp-letta-bridge
+cd acp-letta-bridge
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run bridge
+python3 acp_letta_bridge.py

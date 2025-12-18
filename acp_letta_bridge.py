@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""
+ACP-to-Letta Bridge Server
+Connects Zed Editor (ACP) to Letta Agents
+"""
+
+import sys
+import json
+import logging
+import asyncio
+from typing import Dict, Any, Optional
+from acp_protocol import ACPHandler
+from letta_client_wrapper import LettaClientWrapper
+from config import Config
+
+# Configure logging to stderr (stdout is for JSON-RPC)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stderr
+)
+logger = logging.getLogger(__name__)
+
+
+class ACPLettaBridge:
+    """Main bridge server connecting ACP to Letta"""
+    
+    def __init__(self, config: Config):
+        self.config = config
+        self.acp_handler = ACPHandler()
+        self.letta_client = LettaClientWrapper(config)
+        self.agent_id: Optional[str] = None
+        self.running = True
+        
+    async def initialize(self):
+        """Initialize connection to Letta server"""
+        logger.info("Initializing ACP-Letta Bridge...")
+        
+        # Connect to Letta
+        await self.letta_client.connect()
+        
+        # Create or retrieve agent
+        self.agent_id = await self.letta_client.get_or_create_agent(
+            agent_name=self.config.agent_name,
+            agent_config={
+                "persona": "You are a helpful coding assistant with persistent memory.",
+                "tools": ["code_execution", "memory_edit", "web_search"]
+            }
+        )
+        
+        logger.info(f"Bridge initialized with agent: {self.agent_id}")
+        
+    async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle incoming ACP JSON-RPC request"""
+        method = request.get("method")
+        params = request.get("params", {})
+        request_id = request.get("id")
+        
+        logger.debug(f"Received request: {method}")
+        
+        try:
+            if method == "initialize":
+                result = await self._handle_initialize(params)
+            elif method == "agent/complete":
+                result = await self._handle_complete(params)
+            elif method == "agent/edit":
+                result = await self._handle_edit(params)
+            elif method == "agent/cancel":
+                result = await self._handle_cancel(params)
+            elif method == "shutdown":
+                result = await self._handle_shutdown(params)
+                self.running = False
+            else:
+                raise Exception(f"Unknown method: {method}")
+                
+            return self.acp_handler.success_response(request_id, result)
+            
+        except Exception as e:
+            logger.error(f"Error handling {method}: {e}", exc_info=True)
+            return self.acp_handler.error_response(request_id, str(e))
+    
+    async def _handle_initialize(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle ACP initialize request"""
+        return {
+            "protocolVersion": "0.1.0",
+            "capabilities": {
+                "completion": True,
+                "edit": True,
+                "memory": True
+            },
+            "serverInfo": {
+                "name": "Letta Agent",
+                "version": "1.0.0"
+            }
+        }
+    
+    async def _handle_complete(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle code completion request"""
+        prompt = params.get("prompt", "")
+        context = params.get("context", {})
+        
+        # Build message with context
+        message = f"Code completion request:
+{prompt}
+
+Context: {json.dumps(context)}"
+        
+        # Send to Letta agent
+        response = await self.letta_client.send_message(self.agent_id, message)
+        
+        return {
+            "completion": response.get("text", ""),
+            "metadata": {
+                "agent_id": self.agent_id,
+                "memory_updated": response.get("memory_updated", False)
+            }
+        }
+    
+    async def _handle_edit(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle code editing request"""
+        instruction = params.get("instruction", "")
+        code = params.get("code", "")
+        file_path = params.get("filePath", "")
+        
+        # Build edit request for Letta
+        message = f"""Edit request:
+File: {file_path}
+Instruction: {instruction}
+
+Current code:

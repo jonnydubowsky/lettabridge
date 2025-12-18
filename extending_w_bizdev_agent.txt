@@ -1,0 +1,7 @@
+# In letta_client_wrapper.py, modify get_or_create_agent():
+
+agent = self.client.create_agent(
+    name="bizdev_strategist",
+    system="You are a business development strategist specializing in negative space analysis.",
+    tools=["web_search", "code_execution", "memory_edit"]
+)

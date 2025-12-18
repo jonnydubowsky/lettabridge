@@ -1,0 +1,5 @@
+# Clone to Zed extensions directory
+cd ~/.config/zed/extensions
+git clone https://github.com/yourusername/letta-acp-bridge
+
+# Zed will auto-detect and load the extension

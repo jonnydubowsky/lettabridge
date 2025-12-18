@@ -1,0 +1,107 @@
+
+Please provide the edited code."""
+
+        # Send to Letta agent
+        response = await self.letta_client.send_message(self.agent_id, message)
+        
+        # Extract edited code from response
+        edited_code = self._extract_code_from_response(response.get("text", ""))
+        
+        return {
+            "edits": [{
+                "range": {
+                    "start": {"line": 0, "character": 0},
+                    "end": {"line": len(code.split('
+')), "character": 0}
+                },
+                "newText": edited_code
+            }],
+            "metadata": {
+                "agent_id": self.agent_id,
+                "reasoning": response.get("reasoning", "")
+            }
+        }
+    
+    async def _handle_cancel(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle cancellation request"""
+        # Letta doesn't have built-in cancellation, but we can note it
+        logger.info("Cancellation requested")
+        return {"cancelled": True}
+    
+    async def _handle_shutdown(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle shutdown request"""
+        logger.info("Shutting down bridge...")
+        await self.letta_client.disconnect()
+        return {"shutdown": True}
+    
+    def _extract_code_from_response(self, text: str) -> str:
+        """Extract code block from Letta response"""
+        # Simple code block extraction (can be enhanced)
+        if "```" in text:
+            parts = text.split("```")
+            if len(parts) >= 3:
+                code_block = parts[1]
+                # Remove language identifier if present
+                lines = code_block.split('
+')
+                if lines[0].strip() in ['python', 'javascript', 'typescript', 'java', 'go', 'rust']:
+                    return '
+'.join(lines[1:])
+                return code_block
+        return text
+    
+    async def run(self):
+        """Main event loop - read from stdin, write to stdout"""
+        logger.info("Bridge server starting...")
+        
+        await self.initialize()
+        
+        logger.info("Bridge ready. Listening for JSON-RPC requests on stdin...")
+        
+        while self.running:
+            try:
+                # Read line from stdin
+                line = await asyncio.get_event_loop().run_in_executor(
+                    None, sys.stdin.readline
+                )
+                
+                if not line:
+                    break
+                    
+                # Parse JSON-RPC request
+                request = json.loads(line.strip())
+                
+                # Handle request
+                response = await self.handle_request(request)
+                
+                # Write response to stdout
+                sys.stdout.write(json.dumps(response) + '
+')
+                sys.stdout.flush()
+                
+            except json.JSONDecodeError as e:
+                logger.error(f"Invalid JSON: {e}")
+                error_response = self.acp_handler.error_response(None, f"Invalid JSON: {e}")
+                sys.stdout.write(json.dumps(error_response) + '
+')
+                sys.stdout.flush()
+                
+            except Exception as e:
+                logger.error(f"Unexpected error: {e}", exc_info=True)
+                error_response = self.acp_handler.error_response(None, str(e))
+                sys.stdout.write(json.dumps(error_response) + '
+')
+                sys.stdout.flush()
+        
+        logger.info("Bridge server stopped.")
+
+
+async def main():
+    """Entry point"""
+    config = Config.from_env()
+    bridge = ACPLettaBridge(config)
+    await bridge.run()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

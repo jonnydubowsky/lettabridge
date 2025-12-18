@@ -1,0 +1,283 @@
+# Run tests
+python3 test_bridge.py
+
+# Build binaries
+./build.sh
+
+# Watch logs
+python3 acp_letta_bridge.py 2>bridge.log
+
+Architecture
+Zed Editor → ACP Bridge → Letta Server → Agent + Memory + Tools
+
+
+Extending with Bizdev Agents
+
+This bridge can connect to any Letta agent:
+
+Code
+
+# In letta_client_wrapper.py, modify get_or_create_agent():
+
+agent = self.client.create_agent(
+    name="bizdev_strategist",
+    system="You are a business development strategist specializing in negative space analysis.",
+    tools=["web_search", "code_execution", "memory_edit"]
+)
+
+# In letta_client_wrapper.py, modify get_or_create_agent():
+
+agent = self.client.create_agent(
+    name="bizdev_strategist",
+    system="You are a business development strategist specializing in negative space analysis.",
+    tools=["web_search", "code_execution", "memory_edit"]
+)
+
+Then create multiple Zed extensions pointing to different agents!
+Troubleshooting
+
+Bridge won't start:
+
+    Check Letta server is running: curl http://localhost:8283/health
+    Check logs in stderr output
+
+Agent not responding:
+
+    Verify agent exists: letta list agents
+    Check Letta server logs
+
+Protocol errors:
+
+    Enable debug logging: export LOG_LEVEL=DEBUG
+    Check JSON-RPC format
+
+Development
+
+Code
+
+# Run tests
+python3 test_bridge.py
+
+# Build binaries
+./build.sh
+
+# Watch logs
+python3 acp_letta_bridge.py 2>bridge.log
+
+# Run tests
+python3 test_bridge.py
+
+# Build binaries
+./build.sh
+
+# Watch logs
+python3 acp_letta_bridge.py 2>bridge.log
+
+Roadmap
+
+    Multiple agent support (switch in Zed)
+    Streaming responses
+    Enhanced memory visualization
+    Integration with Totem Protocol file system
+    Bizdev Agent specialists (architecture, docs, testing)
+
+License
+
+MIT
+Contributing
+
+PRs welcome! This is part of the Totem Protocol Framework project.
+
+Code
+
+
+---
+
+## **Step-by-Step Implementation Guide for Claude Code**
+
+### **Phase 1: Local Testing (30 minutes)**
+
+1. **Setup environment:**
+   ```bash
+   mkdir acp-letta-bridge && cd acp-letta-bridge
+   # Copy all files above
+   pip install -r requirements.txt
+
+
+---
+
+## **Step-by-Step Implementation Guide for Claude Code**
+
+### **Phase 1: Local Testing (30 minutes)**
+
+1. **Setup environment:**
+   ```bash
+   mkdir acp-letta-bridge && cd acp-letta-bridge
+   # Copy all files above
+   pip install -r requirements.txt
+
+    Start Letta server:
+
+    Code
+
+letta server
+
+letta server
+
+Test bridge locally:
+
+Code
+
+    python3 test_bridge.py
+
+    python3 test_bridge.py
+
+Phase 2: Build Binaries (1 hour)
+
+    Install PyInstaller:
+
+    Code
+
+pip install pyinstaller
+
+pip install pyinstaller
+
+Build for your platform:
+
+Code
+
+./build.sh
+
+./build.sh
+
+Test binary:
+
+Code
+
+    ./dist/acp-letta-bridge
+    # Send test JSON-RPC via stdin
+
+    ./dist/acp-letta-bridge
+    # Send test JSON-RPC via stdin
+
+Phase 3: Zed Integration (1 hour)
+
+    Create Zed extension structure:
+
+    Code
+
+    mkdir -p ~/.config/zed/extensions/letta-agent
+    cp extension.toml ~/.config/zed/extensions/letta-agent/
+    cp dist/acp-letta-bridge ~/.config/zed/extensions/letta-agent/
+
+    mkdir -p ~/.config/zed/extensions/letta-agent
+    cp extension.toml ~/.config/zed/extensions/letta-agent/
+    cp dist/acp-letta-bridge ~/.config/zed/extensions/letta-agent/
+
+    Test in Zed:
+        Open Zed
+        Cmd+Shift+A (open agent panel)
+        Should see "Letta Coding Assistant"
+
+Phase 4: Production Release (2 hours)
+
+    Setup GitHub repository
+
+    Create release with binaries for all platforms
+
+    Submit to Zed extension registry
+
+Key Integration Points with Totem Protocol
+
+This bridge creates a universal agent interface pattern:
+
+Code
+
+Platform Interface → Protocol Bridge → Letta Agents → Totem File System
+
+Platform Interface → Protocol Bridge → Letta Agents → Totem File System
+
+You can replicate this pattern for:
+
+    ✅ Telegram (existing)
+    ✅ Zed/ACP (this implementation)
+    🔄 Obsidian/MCP (in progress)
+    🔄 Web API (planned)
+    🔄 VSCode (LSP variant)
+
+
+
+---
+
+## **How to Use the Quick Start Script**
+
+### **Step 1: Save the script**
+```bash
+# Copy the entire script above and save it as:
+nano setup_acp_letta_bridge.sh
+
+# Or download if you host it somewhere:
+curl -O https://your-url/setup_acp_letta_bridge.sh
+
+Step 2: Make it executable
+chmod +x setup_acp_letta_bridge.sh
+
+Step 3: Run it
+
+./setup_acp_letta_bridge.sh
+
+
+The script will:
+
+    ✅ Check prerequisites (Python, pip, Letta server)
+    ✅ Create complete project structure
+    ✅ Generate all 9 source files
+    ✅ Install dependencies
+    ✅ Run tests automatically
+    ✅ Optionally build standalone binary
+    ✅ Optionally install as Zed extension
+
+Total runtime: ~5 minutes (depending on your system)
+What You Get
+
+After running the script, you'll have:
+
+acp-letta-bridge/
+├── acp_letta_bridge.py      ✅ Main bridge server
+├── acp_protocol.py           ✅ ACP protocol handler  
+├── letta_client_wrapper.py  ✅ Letta API wrapper
+├── config.py                 ✅ Configuration
+├── test_bridge.py            ✅ Test suite
+├── requirements.txt          ✅ Dependencies
+├── build.sh                  ✅ Build script
+├── extension.toml            ✅ Zed manifest
+└── README.md                 ✅ Documentation
+
+Plus optionally:
+
+    dist/acp-letta-bridge - Standalone binary
+    ~/.config/zed/extensions/letta-agent/ - Installed extension
+
+    Quick Test After Setup
+
+    # Terminal 1: Start Letta server
+letta server
+
+# Terminal 2: Test the bridge
+cd acp-letta-bridge
+python3 test_bridge.py
+
+You should see:
+
+=== Testing ACP-Letta Bridge ===
+
+1. Testing initialize...
+   ✓ Initialize successful
+
+2. Testing code completion...
+   ✓ Completion successful
+
+3. Testing shutdown...
+   ✓ Shutdown successful
+
+=== All tests completed ===

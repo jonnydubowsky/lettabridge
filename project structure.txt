@@ -1,0 +1,22 @@
+letta-acp-bridge/
+├── src/
+│   ├── __init__.py
+│   ├── acp_server.py          # Main ACP protocol handler
+│   ├── letta_client.py        # Letta API wrapper
+│   ├── protocol.py            # ACP protocol definitions
+│   ├── message_handler.py     # Request/response processing
+│   └── config.py              # Configuration management
+├── tests/
+│   ├── test_acp_server.py
+│   ├── test_letta_client.py
+│   └── test_integration.py
+├── extension/
+│   ├── extension.toml         # Zed extension manifest
+│   └── README.md
+├── examples/
+│   ├── test_client.py         # Test ACP client
+│   └── example_session.json
+├── requirements.txt
+├── setup.py
+├── README.md
+└── .env.example
