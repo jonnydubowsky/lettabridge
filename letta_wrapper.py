@@ -79,10 +79,9 @@ class LettaClientWrapper:
     async def send_message(self, agent_id: str, message: str) -> Dict[str, Any]:
         """Send message to Letta agent and get response"""
         try:
-            response = self.client.agents.messages.send(
+            response = self.client.agents.messages.create(
                 agent_id=agent_id,
-                message=message,
-                role="user"
+                messages=[{"role": "user", "content": message}]
             )
             
             # Extract text from response messages
