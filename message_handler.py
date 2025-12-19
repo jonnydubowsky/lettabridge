@@ -5,7 +5,7 @@ Process ACP requests and format responses
 
 import logging
 from typing import Dict, Any
-from letta_client import LettaClientWrapper
+from letta_wrapper import LettaClientWrapper
 
 logger = logging.getLogger(__name__)
 

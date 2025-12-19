@@ -10,7 +10,7 @@ import logging
 import asyncio
 from typing import Dict, Any, Optional
 from acp_protocol import ACPHandler
-from letta_wrapper import LettaClientWrapper
+from letta_client import LettaClientWrapper
 from config import BridgeConfig
 
 # Configure logging to stderr (stdout is for JSON-RPC)
@@ -44,7 +44,7 @@ class ACPLettaBridge:
             agent_name=self.config.agent_name,
             agent_config={
                 "persona": "You are a helpful coding assistant with persistent memory.",
-                "tools": []
+                "tools": ["code_execution", "memory_edit", "web_search"]
             }
         )
         
@@ -128,73 +128,3 @@ File: {file_path}
 Instruction: {instruction}
 
 Current code:
-{code}
-
-Please provide the edited code."""
-        
-        # Send to Letta agent
-        response = await self.letta_client.send_message(self.agent_id, message)
-        
-        return {
-            "edit": response.get("text", ""),
-            "metadata": {
-                "agent_id": self.agent_id,
-                "memory_updated": response.get("memory_updated", False)
-            }
-        }
-    
-    async def _handle_cancel(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle request cancellation"""
-        return {"status": "cancelled"}
-    
-    async def _handle_shutdown(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle shutdown request"""
-        logger.info("Shutting down bridge...")
-        await self.letta_client.disconnect()
-        return {"status": "shutdown"}
-
-
-async def main():
-    """Main entry point"""
-    config = BridgeConfig()
-    bridge = ACPLettaBridge(config)
-    
-    try:
-        # Initialize bridge
-        await bridge.initialize()
-        
-        # Main event loop - read from stdin, write to stdout
-        while bridge.running:
-            # Read Content-Length header
-            line = sys.stdin.readline()
-            if not line:
-                break
-                
-            if line.startswith("Content-Length:"):
-                content_length = int(line.split(":")[1].strip())
-                
-                # Read empty line
-                sys.stdin.readline()
-                
-                # Read JSON body
-                body = sys.stdin.read(content_length)
-                request = json.loads(body)
-                
-                # Handle request
-                response = await bridge.handle_request(request)
-                
-                # Write response with Content-Length
-                response_body = json.dumps(response)
-                sys.stdout.write(f"Content-Length: {len(response_body)}\r\n\r\n")
-                sys.stdout.write(response_body)
-                sys.stdout.flush()
-                
-    except KeyboardInterrupt:
-        logger.info("Received interrupt, shutting down...")
-    except Exception as e:
-        logger.error(f"Fatal error: {e}", exc_info=True)
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
